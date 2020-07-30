@@ -91,4 +91,10 @@ public class MemoryWasterController {
 			LockSupport.park();
 		}
 	}
+
+	@RequestMapping("/gc")
+	public String gc() {
+		System.gc();
+		return "redirect:/";
+	}
 }

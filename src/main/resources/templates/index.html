@@ -1,20 +1,20 @@
 <!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-spring4-4.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 
-  <head>
-    <title>Memory Waster</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-  </head>
+<head>
+  <title>Memory Waster</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
 
-  <body>
-  	<h1>Memory Waster</h1>
-  	<p>Pick a link below for the type of memory you want to waste.</p>
-  	<ul>
-  		<li><a href="/heap" th:href="@{/heap(howMuch=1000)}">Heap</a></li>
-  		<li><a href="/metaspace" th:href="@{/metaspace(howMuch=1000)}">Metaspace</a></li>
-  		<li><a href="/threads" th:href="@{/threads(howMuch=10)}">Threads</a></li>
- 	</ul>
-  </body>
+<body>
+  <h1>Memory Waster</h1>
+  <p>Pick a link below for the type of memory you want to waste.</p>
+  <ul>
+    <li><a href="/heap" th:href="@{/heap(howMuch=1000)}">Heap</a></li>
+    <li><a href="/metaspace" th:href="@{/metaspace(howMuch=1000)}">Metaspace</a></li>
+    <li><a href="/threads" th:href="@{/threads(howMuch=10)}">Threads</a></li>
+    <li><a href="/gc" th:href="@{/gc}">Request GC</a></li>
+  </ul>
+</body>
 
 </html>
