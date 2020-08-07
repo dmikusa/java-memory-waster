@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -20,7 +21,8 @@ import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.implementation.FixedValue;
 import net.bytebuddy.matcher.ElementMatchers;
 
-@Controller("/api/v1")
+@Controller
+@RequestMapping("/api/v1/memory")
 public class MemoryWasterAPIController {
 	private static final Logger log = LoggerFactory.getLogger(MemoryWasterAPIController.class);
 
@@ -50,7 +52,7 @@ public class MemoryWasterAPIController {
 		if (howMuch <= 0) {
 			throw new IllegalArgumentException("You must have a postive number for the amount of junk");
 		}
-		
+
 		List<Object> objs = (retain) ? allObjs : new ArrayList<>();
 
 		log.info("Going to create " + howMuch + " junk classes...");
@@ -79,7 +81,7 @@ public class MemoryWasterAPIController {
 		if (howMuch <= 0) {
 			throw new IllegalArgumentException("You must have a postive number for the amount of junk");
 		}
-		
+
 		List<Thread> threads = new ArrayList<>();
 		log.info("Going to create " + howMuch + " junk threads...");
 		for (int i = 0; i < howMuch; i++) {
@@ -109,16 +111,16 @@ public class MemoryWasterAPIController {
 		log.info("GC requested");
 		System.gc();
 	}
-	
+
 	@ExceptionHandler(IllegalArgumentException.class)
 	@ResponseBody
 	public ResponseEntity<?> illegalArguments(Throwable ex) {
 		return new ResponseEntity<>(new IllegalArgumentError(ex.getMessage()), HttpStatus.BAD_REQUEST);
 	}
-	
+
 	private class IllegalArgumentError {
 		private String error;
-		
+
 		public IllegalArgumentError(String error) {
 			this.setError(error);
 		}
