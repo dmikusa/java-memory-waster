@@ -42,7 +42,7 @@ public class MemoryWasterAPIController {
 		for (int i = 0; i < howMuch; i++) {
 			junk.add(new int[1000]);
 		}
-		log.info("Created " + junk.size() + " pieces of junk.");
+		log.info("Retaining " + junk.size() + " pieces of junk.");
 	}
 
 	@PostMapping("/metaspace")
@@ -71,7 +71,7 @@ public class MemoryWasterAPIController {
 			// make an instance & old the reference so the class stays in memory
 			objs.add(cp.getDeclaredConstructor().newInstance());
 		}
-		log.info("Created " + objs.size() + " classes");
+		log.info("Retaining " + objs.size() + " classes");
 	}
 
 	@PostMapping("/threads")
@@ -93,7 +93,7 @@ public class MemoryWasterAPIController {
 		if (retain) {
 			allThreads.addAll(threads);
 		}
-		log.info("Created " + threads.size() + " threads");
+		log.info("Retaining " + threads.size() + " threads");
 	}
 
 	private class StackWaster {
@@ -125,6 +125,7 @@ public class MemoryWasterAPIController {
 			this.setError(error);
 		}
 
+		@SuppressWarnings("unused")
 		public String getError() {
 			return error;
 		}
