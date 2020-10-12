@@ -19,13 +19,13 @@ var alert = new Vue({
 	}
 });
 
-function newButton(id, api) {
+function newButton(id, api, defaultHowMuch) {
 	return new Vue({
 		el: '#' + id,
 		data: function () {
 			return {
 				result: "",
-				howMuch: 1000,
+				howMuch: (defaultHowMuch) ? defaultHowMuch : 1000,
 				retain: false,
 			};
 		},
@@ -56,5 +56,5 @@ function newButton(id, api) {
 
 var heapBtn = newButton("heap", "/api/v1/memory/heap");
 var metaBtn = newButton("metaspace", "/api/v1/memory/metaspace");
-var threadsBtn = newButton("threads", "/api/v1/memory/threads");
+var threadsBtn = newButton("threads", "/api/v1/memory/threads", 10);
 var gcBtn = newButton("gc", "/api/v1/memory/gc");
