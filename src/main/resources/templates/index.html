@@ -47,32 +47,32 @@
 
     <div class="py-5 bg-light">
       <div class="container">
-      	<div class="row">
-      		<div class="col-md-6">
-      			<h1>Java Memory Waster</h1>
-        		<p>Pick a section below to select the type of memory you want to waste.</p>
-      		</div>
-      		<div class="col-md-6">
-      			<div class="alert" :class="{'alert-danger': (type == 'danger'), 'alert-success': (type == 'success')}" role="alert" id="alert" v-show="show">
-              		{{ message }}
-              	</div>
-      		</div>
-      	</div>
+        <div class="row">
+            <div class="col-md-6">
+                <h1>Java Memory Waster</h1>
+                <p>Pick a section below to select the type of memory you want to waste.</p>
+            </div>
+            <div class="col-md-6">
+                <div class="alert" :class="{'alert-danger': (type == 'danger'), 'alert-success': (type == 'success')}" role="alert" id="alert" v-show="show">
+                    {{ message }}
+                </div>
+            </div>
+        </div>
 
         <div class="row">
           <div class="col-md-6">
             <div class="card mb-4 shadow-sm">
               <div class="card-body">
-              	<h3 class="card-title">Heap</h3>
+                <h3 class="card-title">Heap</h3>
                 <p class="card-text">This simulates a leak by creating a lot of objects and retaining a reference to them. Since the JVM is a garbage collected the main type of "memory leaks" you'll see are caused by accidentally retaining references to objects, which prevents GC and causes heap memory to build over time. This will simulate that scenario.</p>
                 <p class="card-text">Click the button below to generate a leak in the heap.</p>
                 <hr />
                 <div class="d-flex justify-content-between align-items-center" id="heap">
-                	<label style="font-weight: 500" for="howMuch">How Much Junk?</label>
-                	<input type="text" id="howMuch" v-model="howMuch" style="width: 5em; text-align: center" />
-                	<label style="font-weight: 500" for="retain">Retain?</label>
-                	<input style="width: 25px; height: 25px;" type="checkbox" id="retain" v-model="retain" />
-                	<button type="button" class="btn btn-sm btn-outline-secondary" @click="click" style="min-width: 7em">Heap</button>
+                    <label style="font-weight: 500" for="howMuch">How Much Junk?</label>
+                    <input type="text" id="howMuch" v-model="howMuch" style="width: 5em; text-align: center" />
+                    <label style="font-weight: 500" for="retain">Retain?</label>
+                    <input style="width: 25px; height: 25px;" type="checkbox" id="retain" v-model="retain" />
+                    <button type="button" class="btn btn-sm btn-outline-secondary" @click="click" style="min-width: 7em">Execute</button>
                 </div>
               </div>
             </div>
@@ -81,16 +81,16 @@
           <div class="col-md-6">
             <div class="card mb-4 shadow-sm">
               <div class="card-body">
-              	<h3 class="card-title">Metaspace</h3>
+                <h3 class="card-title">Metaspace</h3>
                 <p class="card-text">This simulates a resource leak by dynamically creating a lot of classes, loading them into the JVM and preventing GC. This will, if done enough, cause the metaspace to fill up, generating an OutOfMemoryError. This scenario can happen accidentally with dynamically loaded classes under the right conditions.</p>
                 <p class="card-text">Click the button below to generate a leak in the metaspace.</p>
                 <hr />
                 <div class="d-flex justify-content-between align-items-center" id="metaspace">
-               		<label style="font-weight: 500" for="howMuch">How Much Junk?</label>
-                	<input type="text" id="howMuch" v-model="howMuch" style="width: 5em; text-align: center" />
-                	<label style="font-weight: 500" for="retain">Retain?</label>
-                	<input style="width: 25px; height: 25px;" type="checkbox" id="retain" v-model="retain" />
-                  	<button type="button" class="btn btn-sm btn-outline-secondary" @click="click" style="min-width: 7em">Metaspace</button>
+                    <label style="font-weight: 500" for="howMuch">How Much Junk?</label>
+                    <input type="text" id="howMuch" v-model="howMuch" style="width: 5em; text-align: center" />
+                    <label style="font-weight: 500" for="retain">Retain?</label>
+                    <input style="width: 25px; height: 25px;" type="checkbox" id="retain" v-model="retain" />
+                    <button type="button" class="btn btn-sm btn-outline-secondary" @click="click" style="min-width: 7em">Execute</button>
                 </div>
               </div>
             </div>
@@ -99,16 +99,16 @@
           <div class="col-md-6">
             <div class="card mb-4 shadow-sm">
               <div class="card-body">
-             	<h3 class="card-title">Threads</h3>
+                <h3 class="card-title">Threads</h3>
                 <p class="card-text">Create lots of threads and keep them around forever. This is a very deliberate leak to force unchecked thread growth. Unchecked thread growth can cause a number of problems, like running out of thread stack space or exhausting native OS threads. This option can be used to simulate those scenarios.</p>
                 <p class="card-text">Click the button below to generate a thread leak.</p>
                 <hr />
                 <div class="d-flex justify-content-between align-items-center" id="threads">
-                  	<label style="font-weight: 500" for="howMuch">How Much Junk?</label>
-                	<input type="text" id="howMuch" v-model="howMuch" style="width: 5em; text-align: center" />
-                	<label style="font-weight: 500" for="retain">Retain?</label>
-                	<input style="width: 25px; height: 25px;" type="checkbox" id="retain" v-model="retain" />
-               	   	<button type="button" class="btn btn-sm btn-outline-secondary" @click="click" style="min-width: 7em">Threads</button>
+                    <label style="font-weight: 500" for="howMuch">How Many Threads?</label>
+                    <input type="text" id="howMuch" v-model="howMuch" style="width: 5em; text-align: center" />
+                    <label style="font-weight: 500" for="retain">Retain?</label>
+                    <input style="width: 25px; height: 25px;" type="checkbox" id="retain" v-model="retain" />
+                    <button type="button" class="btn btn-sm btn-outline-secondary" @click="click" style="min-width: 7em">Execute</button>
                 </div>
               </div>
             </div>
@@ -122,7 +122,7 @@
                 <p class="card-text">Click the button below to request a full garbage collection.</p>
                 <hr />
                 <div class="d-flex justify-content-between align-items-center" id="gc">
-                	<button type="button" class="btn btn-sm btn-outline-secondary" @click="click" style="min-width: 7em">Collect Garbage</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" @click="click" style="min-width: 7em">Execute</button>
                 </div>
               </div>
             </div>
