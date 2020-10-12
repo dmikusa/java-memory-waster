@@ -77,8 +77,7 @@ public class MemoryWasterAPIController {
 
 	@PostMapping("/threads")
 	@ResponseStatus(code = HttpStatus.ACCEPTED)
-	public void threads(@RequestParam(defaultValue = "0") int howMuch, @RequestParam(defaultValue = "1000") int depth,
-			@RequestParam(defaultValue = "false") boolean retain) {
+	public void threads(@RequestParam(defaultValue = "0") int howMuch, @RequestParam(defaultValue = "1000") int depth) {
 		if (howMuch <= 0) {
 			throw new IllegalArgumentException("You must have a postive number for the amount of junk");
 		}
@@ -91,11 +90,8 @@ public class MemoryWasterAPIController {
 			}, "junk-thread-" + UUID.randomUUID().toString()));
 		}
 		threads.stream().forEach(t -> t.start());
-		if (retain) {
-			allThreads.addAll(threads);
-		}
-		log.info("Finished creating " + threads.size() + " threads. Will these be retained? "
-				+ ((retain) ? "yes" : "no"));
+		allThreads.addAll(threads);
+		log.info("Finished creating " + threads.size() + " threads.");
 	}
 
 	private class StackWaster {

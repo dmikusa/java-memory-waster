@@ -34,7 +34,9 @@ function newButton(id, api, defaultHowMuch) {
 				var params = {};
 				if (id != "gc") {
 					params["howMuch"] = this.howMuch;
-					params["retain"] = this.retain;
+					if (id != "threads") {
+						params["retain"] = this.retain;
+					}
 				}
 				axios
 					.post(api, null, {
