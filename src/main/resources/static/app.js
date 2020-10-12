@@ -39,6 +39,7 @@ function newButton(id, api, defaultHowMuch) {
 				axios
 					.post(api, null, {
 						params: params,
+						config: { timeout: 2 },
 					})
 					.then(resp => {
 						this.result = resp.data;
@@ -47,8 +48,9 @@ function newButton(id, api, defaultHowMuch) {
 						setTimeout(() => alert.clear(), 2000);
 					})
 					.catch(err => {
-						alert.message = err.response.data.error;
-						alert.type = "danger"
+						alert.message = err.toString();
+						alert.type = "danger";
+						console.error(err);
 					});
 			}
 		}
