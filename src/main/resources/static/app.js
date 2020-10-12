@@ -44,6 +44,7 @@ function newButton(id, api, defaultHowMuch) {
 						this.result = resp.data;
 						alert.message = "Success";
 						alert.type = "success";
+						setTimeout(() => alert.clear(), 2000);
 					})
 					.catch(err => {
 						alert.message = err.response.data.error;
