@@ -42,7 +42,8 @@ public class MemoryWasterAPIController {
 		for (int i = 0; i < howMuch; i++) {
 			junk.add(new int[1000]);
 		}
-		log.info("Retaining " + junk.size() + " pieces of junk.");
+		log.info("Finished creating " + junk.size() + " pieces of junk. Will these be retained? "
+				+ ((retain) ? "yes" : "no"));
 	}
 
 	@PostMapping("/metaspace")
@@ -71,7 +72,7 @@ public class MemoryWasterAPIController {
 			// make an instance & old the reference so the class stays in memory
 			objs.add(cp.getDeclaredConstructor().newInstance());
 		}
-		log.info("Retaining " + objs.size() + " classes");
+		log.info("Finished creating " + objs.size() + " classes. Will these be retained? " + ((retain) ? "yes" : "no"));
 	}
 
 	@PostMapping("/threads")
@@ -93,7 +94,8 @@ public class MemoryWasterAPIController {
 		if (retain) {
 			allThreads.addAll(threads);
 		}
-		log.info("Retaining " + threads.size() + " threads");
+		log.info("Finished creating " + threads.size() + " threads. Will these be retained? "
+				+ ((retain) ? "yes" : "no"));
 	}
 
 	private class StackWaster {
