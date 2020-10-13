@@ -22,7 +22,7 @@ Run the app then access [http://localhost:8080](http://localhost:8080) in your b
 
 Here are some fun activites you can try.
 
-### Retain Heap Memory
+### Heap Memory
 
 The first box allows you to create a bunch of objects on the heap. 
 
@@ -52,7 +52,7 @@ Here's how to use this to do some fun stuff:
 
         This is a common problem in Java applications, unintentionally retaining a reference to objects which are no longer used. In small doses, it's not a big deal but over time or in long running applications usage will build up and eventually cause an OOME. Tracking the increase and determining what is causing the references to be retained is the only way to resolve this type of issue.
 
-### Retain Metaspace
+### Metaspace
 
 The second box allows you to create a bunch of class objects dynamically, which raises the Metaspace usage. 
 
@@ -85,3 +85,32 @@ Here's how to use this to do some fun stuff:
         This is more realistic than the first task in this section, as most real applications are going to retain instances of a class in memory and thus the class will not be able to be unloaded. Eventually, if enough classes are loaded you'll just run out of metaspace. Typically the fix is to restart and give yourself more metaspace, as you likely just need more metaspace. 
   
         If you suspect a leak, then you'd need to take some heap dumps and look for instances of the class or classes that you believe should have been unloaded. When you find what classes are still alive, then you can figure out what's referring to them. Lastly, you'd need to update the code to not hold the references. Once the references are gone, GC will occur and classes should propertly unload.
+
+### Threads
+
+The third box allows you to create a bunch of threads. Simply enter a value for how many unique threads to create and press the button.
+
+Here's how to use this to do some fun stuff:
+
+1. Force a bunch of threads to be created.
+    1. Set the number of threads like 100.
+    2. Click the "Execute" button.
+
+        The net result will be a bunch of extra threads hanging around in the application. These threads are not doing anything so they are just parked, however they do consume thread stack memory.
+
+        Connect to the application with your Profiler and click on the tab to view Threads. You can filter on `junk-thread`, which is the prefix given to the threads the app creates. Pick one to look at and you'll see it's just sitting and waiting, doing nothing. *Note* your profiler may list this as a "deadlock" but it's not, the threads are just parked not doing anything which is why the stack isn't changing.
+
+        The next fun thing to do is to enable Java NMT (Native Memory Tracing). This is really the only want to get a good picture of the memory overhead of the threads being created. To do that, we're going to run `java -XX:NativeMemoryTracking=summary -jar target/java-memory-waster-0.0.1-SNAPSHOT.jar`, which enables Java NMT. Now, run `jps` and find the process id of the application. Then run `jcmd <pid> VM.native_memory baseline`. This will take a Java NMT baseline.
+        
+        Go into the application and create some threads. Then run `jcmd <pid> VM.native_memory summary.diff`. This will output a differential from the baseline that we previously took. Look at the section for threads.
+
+        ```
+        -            Thread (reserved=65825KB +20573KB, committed=65825KB +20573KB)
+                            (thread #64 +20)
+                            (stack: reserved=65536KB +20480KB, committed=65536KB +20480KB)
+                            (malloc=216KB +69KB #386 +120)
+                            (arena=73KB +23 #126 +40)
+        ```
+
+        You can see how the number of threads is at 64 and that it's +20 from the baseline (I created 20 threads in the example, it'll be plus however many you created). We can also see that the stack is up 20480KB or 20MB (i.e 1MB per thread is the default stack size. Homework: try setting `-Xss228k` and repeating the test, how does that impact memory usage?).
+
