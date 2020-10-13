@@ -22,7 +22,7 @@ import net.bytebuddy.implementation.FixedValue;
 import net.bytebuddy.matcher.ElementMatchers;
 
 @Controller
-@RequestMapping("/api/v1/memory")
+@RequestMapping("/api/v1")
 public class MemoryWasterAPIController {
 	private static final Logger log = LoggerFactory.getLogger(MemoryWasterAPIController.class);
 
@@ -30,7 +30,7 @@ public class MemoryWasterAPIController {
 	private List<Object> allObjs = new ArrayList<>();
 	private List<Thread> allThreads = new ArrayList<>();
 
-	@PostMapping("/heap")
+	@PostMapping("/memory/heap")
 	@ResponseStatus(code = HttpStatus.ACCEPTED)
 	public void heap(@RequestParam(defaultValue = "0") int howMuch,
 			@RequestParam(defaultValue = "false") boolean retain) {
@@ -46,7 +46,7 @@ public class MemoryWasterAPIController {
 				+ ((retain) ? "yes" : "no"));
 	}
 
-	@PostMapping("/metaspace")
+	@PostMapping("/memory/metaspace")
 	@ResponseStatus(code = HttpStatus.ACCEPTED)
 	public void metaspace(@RequestParam(defaultValue = "0") int howMuch,
 			@RequestParam(defaultValue = "false") boolean retain) throws Exception {
@@ -103,7 +103,7 @@ public class MemoryWasterAPIController {
 		}
 	}
 
-	@PostMapping("/gc")
+	@PostMapping("/memory/gc")
 	@ResponseStatus(code = HttpStatus.ACCEPTED)
 	public void gc() {
 		log.info("GC requested");

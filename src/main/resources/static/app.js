@@ -61,5 +61,5 @@ function newButton(id, api, defaultHowMuch) {
 
 var heapBtn = newButton("heap", "/api/v1/memory/heap");
 var metaBtn = newButton("metaspace", "/api/v1/memory/metaspace");
-var threadsBtn = newButton("threads", "/api/v1/memory/threads", 10);
+var threadsBtn = newButton("threads", "/api/v1/threads", 10);
 var gcBtn = newButton("gc", "/api/v1/memory/gc");
