@@ -3,13 +3,16 @@ package com.vmware.mapbu.support.jmw;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.LockSupport;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,6 +32,7 @@ public class MemoryWasterAPIController {
 	private List<int[]> allJunk = new ArrayList<>();
 	private List<Object> allObjs = new ArrayList<>();
 	private List<Thread> allThreads = new ArrayList<>();
+	private List<Thread> philosophers = new ArrayList<>();
 
 	@PostMapping("/memory/heap")
 	@ResponseStatus(code = HttpStatus.ACCEPTED)
@@ -94,7 +98,40 @@ public class MemoryWasterAPIController {
 		log.info("Finished creating " + threads.size() + " threads.");
 	}
 
-	private class StackWaster {
+	@PostMapping("/deadlock")
+	@ResponseStatus(code = HttpStatus.ACCEPTED)
+	public void deadlock() {
+		log.info("Initiating deadlock, unleashing the Philosophers...");
+
+		Lock[] locks = new Lock[] { new ReentrantLock(), new ReentrantLock(), new ReentrantLock(), new ReentrantLock(),
+				new ReentrantLock() };
+
+		if (philosophers.size() > 0) {
+			clear_dishes();
+		}
+
+		philosophers.add(new Philosopher(locks[0], locks[1]));
+		philosophers.add(new Philosopher(locks[1], locks[2]));
+		philosophers.add(new Philosopher(locks[2], locks[3]));
+		philosophers.add(new Philosopher(locks[3], locks[4]));
+		philosophers.add(new Philosopher(locks[4], locks[0]));
+
+		philosophers.stream().forEach(t -> t.start());
+	}
+
+	@DeleteMapping("/deadlock")
+	@ResponseStatus(code = HttpStatus.OK)
+	public void stop_deadlock() {
+		clear_dishes();
+	}
+
+	private void clear_dishes() {
+		log.info("Cleaning up after the Philosophers");
+		philosophers.stream().forEach(t -> t.interrupt());
+		philosophers.clear();
+	}
+
+	private static class StackWaster {
 		public void go(int cnt, int depth) {
 			if (cnt < depth) {
 				this.go(cnt + 1, depth);
