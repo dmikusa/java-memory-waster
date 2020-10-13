@@ -19,12 +19,47 @@ var alert = new Vue({
 	}
 });
 
+var deadlock = new Vue({
+	el: '#deadlock',
+	methods: {
+		initiate: function (event) {
+			axios.post("/api/v1/deadlock", null, {
+					config: { timeout: 2 },
+			})
+			.then(() => {
+				alert.message = "Success";
+				alert.type = "success";
+				setTimeout(() => alert.clear(), 2000);
+			})
+			.catch(err => {
+				alert.message = err.toString();
+				alert.type = "danger";
+				console.error(err);
+			});
+		},
+		interrupt: function (event) {
+			axios.delete("/api/v1/deadlock", null, {
+					config: { timeout: 2 },
+			})
+			.then(() => {
+				alert.message = "Success";
+				alert.type = "success";
+				setTimeout(() => alert.clear(), 2000);
+			})
+			.catch(err => {
+				alert.message = err.toString();
+				alert.type = "danger";
+				console.error(err);
+			});
+		},
+	}
+});
+
 function newButton(id, api, defaultHowMuch) {
 	return new Vue({
 		el: '#' + id,
 		data: function () {
 			return {
-				result: "",
 				howMuch: (defaultHowMuch) ? defaultHowMuch : 1000,
 				retain: false,
 			};
@@ -43,8 +78,7 @@ function newButton(id, api, defaultHowMuch) {
 						params: params,
 						config: { timeout: 2 },
 					})
-					.then(resp => {
-						this.result = resp.data;
+					.then(() => {
 						alert.message = "Success";
 						alert.type = "success";
 						setTimeout(() => alert.clear(), 2000);
