@@ -1,5 +1,7 @@
 package com.vmware.mapbu.support.jmw;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -33,6 +35,8 @@ public class MemoryWasterAPIController {
 	private List<Object> allObjs = new ArrayList<>();
 	private List<Thread> allThreads = new ArrayList<>();
 	private List<Thread> philosophers = new ArrayList<>();
+	private SimplePool pool = new SimplePool();
+	private List<Thread> poolThreads = new ArrayList<>();
 
 	@PostMapping("/memory/heap")
 	@ResponseStatus(code = HttpStatus.ACCEPTED)
@@ -98,6 +102,15 @@ public class MemoryWasterAPIController {
 		log.info("Finished creating " + threads.size() + " threads.");
 	}
 
+	private static class StackWaster {
+		public void go(int cnt, int depth) {
+			if (cnt < depth) {
+				this.go(cnt + 1, depth);
+			}
+			LockSupport.park();
+		}
+	}
+
 	@PostMapping("/deadlock")
 	@ResponseStatus(code = HttpStatus.ACCEPTED)
 	public void deadlock() {
@@ -131,13 +144,52 @@ public class MemoryWasterAPIController {
 		philosophers.clear();
 	}
 
-	private static class StackWaster {
-		public void go(int cnt, int depth) {
-			if (cnt < depth) {
-				this.go(cnt + 1, depth);
-			}
-			LockSupport.park();
+	@PostMapping("/slow-threads")
+	@ResponseStatus(code = HttpStatus.ACCEPTED)
+	public void slow_threads() {
+		log.info("Initiating slow threads test");
+
+		if (poolThreads.size() > 0) {
+			clear_pool_threads();
 		}
+
+		for (int i = 0; i < 20; i++) {
+			poolThreads.add(new Thread((Runnable) () -> {
+				try {
+					while (true) {
+						Instant start = Instant.now();
+						Permit p = null;
+						try {
+							p = pool.obtainPermit();
+							log.info("Permit obtained (" + p.getData() + ") which took "
+									+ Duration.between(start, Instant.now()));
+							Thread.yield();
+							Thread.sleep(1000);
+						} finally {
+							if (p != null) {
+								pool.returnPermit(p);
+							}
+						}
+					}
+				} catch (InterruptedException ex) {
+					log.info("pool thread interrupted");
+				}
+			}, "PoolThread-" + i));
+		}
+
+		poolThreads.stream().forEach(t -> t.start());
+	}
+
+	@DeleteMapping("/slow-threads")
+	@ResponseStatus(code = HttpStatus.OK)
+	public void stop_slow_threads() {
+		clear_pool_threads();
+	}
+
+	private void clear_pool_threads() {
+		log.info("Cleaning up the pool threads");
+		poolThreads.stream().forEach(t -> t.interrupt());
+		poolThreads.clear();
 	}
 
 	@PostMapping("/memory/gc")

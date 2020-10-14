@@ -130,6 +130,21 @@
           <div class="col-md-6">
             <div class="card mb-4 shadow-sm">
               <div class="card-body">
+                <h3 class="card-title">Slow Threads</h3>
+                <p class="card-text">Initiate a slow thread simulation. This is done by creating a shared pool of fake resources. The resources are checked out to a greater number of threads, which blocks some of the threads causing them to be slower.</p>
+                <p class="card-text">Click the Execute button below to start or the Interrupt button to stop one that's in progress.</p>
+                <hr />
+                <div class="d-flex justify-content-between align-items-center" id="slowthreads">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" @click="initiate" style="min-width: 7em">Execute</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" @click="interrupt" style="min-width: 7em">Interrupt</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card mb-4 shadow-sm">
+              <div class="card-body">
                 <h3 class="card-title">Garbage Collect</h3>
                 <p class="card-text">This option will ask the JVM to perform a GC. It's not a guarantee of an immediate GC, but will usually trigger a full GC reasonably quick. This can be useful when running through certain troubleshooting scenarios or when you want to clean up from a scenario without doing a restart of the application.</p>
                 <p class="card-text">Click the button below to request a full garbage collection.</p>
