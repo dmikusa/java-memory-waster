@@ -155,14 +155,17 @@ public class MemoryWasterAPIController {
 
 		for (int i = 0; i < 20; i++) {
 			poolThreads.add(new Thread((Runnable) () -> {
+				int timesObtained = 0;
 				try {
 					while (true) {
 						Instant start = Instant.now();
 						Permit p = null;
 						try {
 							p = pool.obtainPermit();
+							timesObtained++;
 							log.info("Permit obtained (" + p.getData() + ") which took "
-									+ Duration.between(start, Instant.now()));
+									+ Duration.between(start, Instant.now()) + " and has been obtained " + timesObtained
+									+ " times.");
 							Thread.yield();
 							Thread.sleep(1000);
 						} finally {
@@ -174,6 +177,7 @@ public class MemoryWasterAPIController {
 				} catch (InterruptedException ex) {
 					log.info("pool thread interrupted");
 				}
+				log.info("Thread is done and obtained the permit " + timesObtained + " during it's life.");
 			}, "PoolThread-" + i));
 		}
 
