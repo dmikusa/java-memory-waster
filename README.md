@@ -114,3 +114,106 @@ Here's how to use this to do some fun stuff:
 
         You can see how the number of threads is at 64 and that it's +20 from the baseline (I created 20 threads in the example, it'll be plus however many you created). We can also see that the stack is up 20480KB or 20MB (i.e 1MB per thread is the default stack size. Homework: try setting `-Xss228k` and repeating the test, how does that impact memory usage?).
 
+### Deadlocks
+
+The fourth box allows you to create a deadlock. Just click the Execute button to initiate this test, and then watch the output logs from the application.
+
+As the deadlock test runs, you'll see the Dining Philosophers attempt to think and eat at the same time. Eventually this will cause problems and they will get into a deadlock. At this point, output from the Philosophers will stop.
+
+Here's how to use this to do some fun stuff:
+
+1. Initiate a deadlock and wait for it to occur.
+    1. Click the "Execute" button.
+    2. Watch the logs for output.
+
+        The net result will be that there are five threads with a name where the prefix is `Philosopher-`. They will all be blocked waiting on a monitor that is held by one of the other Philosopher threads.
+
+        When the system enters this state, there are a few ways to introspect what has happened.
+
+        First, take a thread dump. Run `jps` and find the process id then run either `kill -3 <pid>` or `jstack <pid>` (both produce the same output).
+
+        The output of the thread dump will indicate that there is a deadlock and you'll see a section like this:
+
+        ```
+        Found one Java-level deadlock:
+        =============================
+        ...
+        ```
+
+        This section is important and will show you which threads are blocked and on which monitors they are blocked. Below that is a section that will also contain the stack traces of the deadlocked threads. It looks like this.
+
+        ```
+        Java stack information for the threads listed above:
+        ===================================================
+        ...
+        ```
+
+        This is also helpful in debugging and figuring out what caused the deadlock.
+
+        The other way to debug this type of situation is to connect with a Profiler. Any decent profiler will have a section to display the current threads and will also detect the deadlock.
+
+        When you're done, click the Interrupt button and it will clear out the deadlock & philosopher threads.
+
+### Slow Threads
+
+Something more likely to be observed in production than a deadlock is the case where thread progress is slowed down due to a shared resource. You have many threads competing for a limit resource, which causes some threads to block while waiting to get access to the shared resource. 
+
+This is something that's more likely to come up in real applications, and a common example where you'll see this is with backend services. If the backend service is slow, using connections to the backend service will be slow. That can cause connections to be checked out of a resource pool for longer durations and that can cause threads to exhaust the resource pool. Once the pool is exhausted, threads will hang or block on the resource pool waiting for a connection to free up. If this doesn't happen or doesn't happen quickly enough, you may even start to see other failures like timeouts and request failures.
+
+Here's how to use this to do some fun stuff:
+
+1. Initiate a slow threads test.
+    1. Click the "Execute" button.
+    2. Watch the logs for output.
+
+        The net result of this test will be that 20 threads are launched, all of which are trying to get fake resources from a pool. The pool limits a maximum of 5 fake resources to be checked out at any time which means at any given time there are typically 15 threads waiting. This slows the threads down, just like in a web application if the request processing threads were blocking while trying to get a connection from a pool for a service.
+
+        For clarity, the following information is embedded into the logs.
+
+        ```
+        Obtaining permit (available -> 5 -- in use -> 0 -- waiting -> 0)
+        Acquired permit (available -> 4 -- in use -> 1 -- waiting -> 0)
+        Returned permit (available -> 1 -- in use -> 4 -- waiting -> 15)
+        ```
+
+        The first line tells us that a thread is trying to obtain a resource. It tells us how many are available, in use and how many threads are waiting. In this case, all five are available and none are in use. The second line is similar, but just prints after a permit has been acquired. The third line is what you see when a permit is returned to the pool.
+
+        A good resource pool will display this type of information in the logs, metrics or through JMX so that you can monitor and tune its configuration.
+
+        ```
+        Permit obtained (2) which took PT4.01145S and has been obtained 7 times.
+        ```
+
+        This line tells us which fake data item was obtained, #4, and how long it took, 4.01s, and how many times this thread has managed to obtain a permit, 7. 
+        
+        As you can see from the logs, the threads can wait quite a long time before obtaining a lock. If this were a web application block on a database connection, the application would be unusably slow and reasonable next steps would be to a.) tune the pool size and b.) investigate why database connections are slow.
+
+        In an actual application, the log information may not be this detailed. In some cases, you can increase log output by lowering the log level of your pool to DEBUG, or something similar. In other cases, you might need to connect via JMX or through some other metrics interface.
+
+        What you can also do is to take thread dumps. Take a few thread dumps, separated by 10-15s. Then review the threads to see what they are doing. Do this now, issue `kill -3 <pid>` or `jstack <pid>` while the test is running.
+
+        You'll see roughly 15 threads in this state:
+
+        ```
+        "PoolThread-0" #59 daemon prio=5 os_prio=31 cpu=4.65ms elapsed=45.51s tid=0x00007fcbd02cb800 nid=0x13407 waiting on condition  [0x000070000d70a000]
+        java.lang.Thread.State: WAITING (parking)
+        at jdk.internal.misc.Unsafe.park(java.base@11.0.8/Native Method)
+        - parking to wait for  <0x000000060f27a068> (a java.util.concurrent.Semaphore$NonfairSync)
+        at java.util.concurrent.locks.LockSupport.park(java.base@11.0.8/LockSupport.java:194)
+        at java.util.concurrent.locks.AbstractQueuedSynchronizer.parkAndCheckInterrupt(java.base@11.0.8/AbstractQueuedSynchronizer.java:885)
+        at java.util.concurrent.locks.AbstractQueuedSynchronizer.doAcquireSharedInterruptibly(java.base@11.0.8/AbstractQueuedSynchronizer.java:1039)
+        at java.util.concurrent.locks.AbstractQueuedSynchronizer.acquireSharedInterruptibly(java.base@11.0.8/AbstractQueuedSynchronizer.java:1345)
+        at java.util.concurrent.Semaphore.acquire(java.base@11.0.8/Semaphore.java:318)
+        at com.vmware.mapbu.support.jmw.SimplePool.obtainPermit(SimplePool.java:32)
+        at com.vmware.mapbu.support.jmw.MemoryWasterAPIController.lambda$4(MemoryWasterAPIController.java:164)
+        at com.vmware.mapbu.support.jmw.MemoryWasterAPIController$$Lambda$733/0x00000008004d0440.run(Unknown Source)
+        at java.lang.Thread.run(java.base@11.0.8/Thread.java:834)
+        ```
+
+        In the thread dump, we can see that we're waiting and the line of code that's triggering us to block. This is useful in tracking down the culprit. In most cases, you'll end up seeing it block on obtaining a resource from the pool, which is what's happening here.
+
+        You can also diff multiple thread dumps. The benefit of this is that you can see if threads are making progress. So if you take two thread dumps and waited 15s between the first and second, you can then look at `PoolThread-0` in both and see what it's doing. If it's stuck at the same line of code, then it either hasn't moved for 15s or it's stuck in a hotspot (i.e. the code frequently executes that line).
+
+        As usual, a profiler is also helpful. It can be used to debug thread issues as well. In this case, the profiler will allow you to look at and take thread dumps.
+
+        When you're done, press the Interrupt button and that will end the test.
