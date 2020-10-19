@@ -10,7 +10,7 @@ Just run `./mvnw package`.
 
 ## To Run
 
-After building, run `java -jar target/java-memory-waster-0.0.1-SNAPSHOT.jar`.
+After building, run `java -jar -Xmx350M -Xms350M -Xss228k -XX:MetaspaceSize=65M -XX:MaxMetaspaceSize=65M target/java-memory-waster-0.0.1-SNAPSHOT.jar`.
 
 ## To Develop
 
