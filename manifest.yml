@@ -1,0 +1,16 @@
+---
+applications:
+- name: memory-waster
+  memory: 1G
+  instances: 1
+  path: target/java-memory-waster-0.0.1-SNAPSHOT.jar
+  buildpacks:
+  - java_buildpack_offline
+  routes:
+  - route: memory-waster.apps.pcfone.io
+  env:
+    SPRING_PROFILES_ACTIVE: cloud
+    JAVA_OPTS: '-Djava.security.egd=file:///dev/urandom -Xss228k -XX:+FlightRecorder'
+    JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '[enabled: false]'
+    JBP_CONFIG_OPEN_JDK_JRE: '{jre: { version: 11.+ }}'
+    JBP_CONFIG_JMX: '{enabled: true}'
