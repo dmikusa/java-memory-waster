@@ -217,3 +217,82 @@ Here's how to use this to do some fun stuff:
         As usual, a profiler is also helpful. It can be used to debug thread issues as well. In this case, the profiler will allow you to look at and take thread dumps.
 
         When you're done, press the Interrupt button and that will end the test.
+
+
+### Java Flight Recorder & Java Mission Control
+
+#### About Java Mission Control
+
+Java Mission Control is a tool that can be used to monitor and manage your JVM based applications. It provides a new and improved JConsole, which allows you to connect to a running Java process view stats and MBeans. In addition, it has the capability of working with Flight Recorder and reading Flight Recorder files.
+
+#### Caveats
+
+Flight Record has traditionally be a commercial feature of the JVM, which means it was only available if using an Oracle JVM and by enabling commercial features (ie. certifying that you are paying Oracle). Oracle has since open sourced this technology and you can now get it as a part of OpenJDK.
+
+VMware Spring Runtime provides OpenJDK binaries through Liberica/Bell Soft. These are the binaries available on the Tanzu Network for download and are the binaries used through the Java buildpack by default. For maximum compatibility, it's recommend that you run the same Liberica OpenJDK build on your local workstation. See the instructions following instructions for installing via Brew. Liberica provides instructions for installing on Windows & Linux as well.
+
+The last item of note is that due to the commercial to open source path this functionality has taken not all versions of OpenJDK have it available. For Java 8, the Liberica OpenJDK builds 272+ have it. All Liberica OpenJDK Java 11 builds have it available.
+
+#### Use Brew to Install Liberica OpenJDK
+
+Add the tap
+
+```
+brew tap bell-sw/liberica
+```
+
+Install either Java 11 (all versions have flight recorder) or Java 8 (version 272+ have flight recorder).
+
+```
+brew cask install liberica-jdk11
+```
+
+Then run `java -version` to confirm you have the expected version.
+
+#### Install Java Mission Control
+
+Liberica ships this as a separate download. [Download it from here](https://bell-sw.com/pages/lmc-7.1.1/) (get the latest version).
+
+Extract the files & move the Liberica Mission Control to your Applications folder.
+
+Click Liberica Mission Control to start it up.
+
+#### Enable Flight Recorder
+
+Flight Recorder isn't enabled by default. It is turned on by adding the `-XX:+FlightRecorder` setting. This doesn't mean any recordings will be captured, but it turns on the functionality. You can then initiate recordings through a number of ways: command line, using `jcmd` (must be the process owner) or Java Mission Control (needs JMX access).
+
+#### Taking Recordings
+
+As mentioned above, you can initiate recordings via command line arguments, `jcmd` and Java Mission Control. When working locally all of these options are viable. When deploying to Cloud Foundry, you would only be able to do this via command line arguments or remotely via Java Mission Control. The latter option requires JMX be enabled, and that a customer is able to `cf ssh`. On CF, `jcmd` won't work because it's not installed.
+
+The [official documentation for Flight Recorder shows details on how to use the various methods](https://docs.oracle.com/javacomponents/jmc-5-5/jfr-runtime-guide/run.htm#JFRRT164).
+
+#### Deploy Memory Waster to CF
+
+This example is going to show how to use Flight Recorder with an app running on Cloud Foundry. You can do the same thing locally, it's just much simpler. You can learn more doing it the hard way though, which is why this doc has choosen that path. If you don't have access to Cloud Foundry, just skip this step and run the app locally with the flag from the Enable Flight Recorder section above, then start Java Mission Control and skip to the Capturing a Fligh Recording section below.
+
+Run `cf push` and deploy using the `manifest.yml` in the repo. This will deploy, enable Flight Recorder and also enable JMX. When it's up and running, proceed to the next section.
+
+#### Connect with Java Mission Control
+
+Open a tunnel to your application. Run `cf ssh -N -T -L 5000:localhost:5000 memory-waster`. Then start Java Mission Control.
+
+Go to File -> New Connection. Select `Create a new connection`. Click `Next`.
+
+Enter `localhost` and `5000` as the host and port. No credentials are required. Click `Test Connection` to validate. It may be a little slow, but it should eventually come back and say "OK". If it does not, troubleshoot your tunnel & connection. When it says "OK", you can press the "Finish" button.
+
+At this point you'll see the new connection in the left panel. You can click to connect to the MBean Server. This is your traditional JConsole like view, which JVM metrics & access to MBeans.
+
+#### Capturing a Flight Recording
+
+Now that we're connected, the next step is to create a Flight Recording. To do that, right click where it says `Flight Recorder` under our connection. Then pick `Start Flight Recording`. In the ensuing dialog box, enter a name for the recording and pick a 1m recording time. Pick `Profiling - on server` for the `Event Settings` and click `Finish`.
+
+Once the recording starts, you'll see it in the list and there will be a count-down time. This is how much time is left before the recording stops. We specified 1m in the settings, but you can adjust as needed. Before the clock runs out, go into the application and do some stuff. Create some heap or metaspace junk, some threads, or whatever you want. Then wait for the time to end, and Mission Control will open up the recording automatically.
+
+You can now browse through the recording & the flight recording file is stored locally on your machine, not on the server (so no need to download anything). A customer could submit this recording file to us for analysis, or you could review it live with them.
+
+There are many options available to adjust how the recordings are captured. Options can impact the information gathered and the overall overhead on the application. The two default profiles in Mission Control are relatively safe and low overhead. [Some of the options can be configured as command line arguments](https://docs.oracle.com/javacomponents/jmc-5-5/jfr-runtime-guide/run.htm#JFRRT173) and some of them are [configured through the event profiles that Flight Recorder will use](https://bestsolution-at.github.io/jfr-doc/). You won't generally need to configure the profiles as the two default profiles work well for debugging production apps, however, you can customize them in Mission Control (Menu -> Window -> Flight Recording Template Manager).
+
+#### Flight Recorder Summary
+
+Flight Recorder is a great tool that can do many thing and provide a ton of data to understand what is happening in a Java application. This article just scratches the surface showing how you can get started with it. [Oracle's Blog has a good article that talks more about what you can do](https://blogs.oracle.com/javamagazine/java-flight-recorder-and-jfr-event-streaming-in-java-14) and there are other great resources online as well.
